@@ -17,6 +17,9 @@ static PT_PixelDatas g_ptMousePixelDatas;
 //鼠标遮盖LCD的像素数据
 static PT_PixelDatas g_ptMouseMaskPixelDatas;
 
+//鼠标移动后重绘显示 和 主显示 同步 用这个来重绘 LCD
+static PT_VideoMem g_ptSyncVideoMem;
+
 //LCD
 static PT_DispOpr g_ptDispOpr;
 
@@ -26,6 +29,8 @@ int ShowMouse(int x, int y)
 	unsigned char *videoMem;
 	unsigned char *mouseMem;
 	int i,j;
+	//使用镜像显存重绘LCD
+	FlushVideoMemToDev(g_ptSyncVideoMem);
 	if((x + g_ptMousePixelDatas->iWidth) <= g_ptDispOpr->iXres && (y + g_ptMousePixelDatas->iHeight) <= g_ptDispOpr->iYres)
 	{
 		//算法和按钮颜色取反类似
@@ -60,6 +65,9 @@ int InitMouse(void)
 	int iXres, iYres, iBpp;
 	int mouse_height;
 	int mouse_width;
+
+	//获取一块显存用来保存 重绘 LCD 的像素
+	g_ptSyncVideoMem = GetVideoMem(ID("sync"), 1);
 	//获取默认dispopr
 	g_ptDispOpr = GetDefaultDispDev();
 	GetDispResolution(&iXres, &iYres, &iBpp);
@@ -178,6 +186,10 @@ int GeneratePage(PT_PageLayout ptPageLayout, PT_VideoMem ptVideoMem)
 		}
 		//释放缩放显存
 		free(tIconPixelDatas.aucPixelDatas);
+
+		//设置显存镜像
+		memcpy(g_ptSyncVideoMem->tPixelDatas.aucPixelDatas, ptVideoMem->tPixelDatas.aucPixelDatas, ptVideoMem->tPixelDatas.iTotalBytes);
+		 
 		ptVideoMem->ePicState = PS_GENERATED;
 	}
 	return 0;
