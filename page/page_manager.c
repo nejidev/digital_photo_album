@@ -23,16 +23,32 @@ static PT_VideoMem g_ptSyncVideoMem;
 //LCD
 static PT_DispOpr g_ptDispOpr;
 
+//重绘历史鼠标
+int ShowHistoryMouse(void)
+{
+	ShowMouse(g_tMouseLayout.iTopLeftX, g_tMouseLayout.iTopLeftY);
+	return 0;
+}
+
 //显示鼠标
 int ShowMouse(int x, int y)
 {
 	unsigned char *videoMem;
 	unsigned char *mouseMem;
 	int i,j;
+	int mouse_height;
+	
 	//使用镜像显存重绘LCD
 	FlushVideoMemToDev(g_ptSyncVideoMem);
 	if((x + g_ptMousePixelDatas->iWidth) <= g_ptDispOpr->iXres && (y + g_ptMousePixelDatas->iHeight) <= g_ptDispOpr->iYres)
 	{
+		//重新设置 鼠标的位置
+		mouse_height = g_tMouseLayout.iBottomRightY - g_tMouseLayout.iTopLeftY;
+		g_tMouseLayout.iTopLeftX = x;
+		g_tMouseLayout.iTopLeftY = y;
+		g_tMouseLayout.iBottomRightX = g_tMouseLayout.iTopLeftX + mouse_height;
+		g_tMouseLayout.iBottomRightY = g_tMouseLayout.iTopLeftY + mouse_height;
+		
 		//算法和按钮颜色取反类似
 		mouseMem  = g_ptMousePixelDatas->aucPixelDatas;
 		videoMem  = g_ptDispOpr->pucDispMem;
@@ -42,7 +58,11 @@ int ShowMouse(int x, int y)
 		{
 			for(i=0; i<g_ptMousePixelDatas->iWidth * g_ptMousePixelDatas->iBpp / 8; i++)
 			{
-				videoMem[i] = *mouseMem;
+				//白色背景不绘制
+				if(0xff > *mouseMem)
+				{
+					videoMem[i] = *mouseMem;
+				}
 				mouseMem++;
 			}
 			videoMem += g_ptDispOpr->iLineWidth;
@@ -74,8 +94,12 @@ int InitMouse(void)
 	//计算鼠标指针大小 为 高度的 1/20
 	mouse_height = iXres / 20;
 	mouse_width  = mouse_height;
-	g_tMouseLayout.iBottomRightX = mouse_width;
-	g_tMouseLayout.iBottomRightY = mouse_height;
+	
+	//初始化时显示在 LCD 屏中间
+	g_tMouseLayout.iTopLeftX     = (iXres - mouse_height)/2;
+	g_tMouseLayout.iTopLeftY     = (iYres - mouse_width) /2;
+	g_tMouseLayout.iBottomRightX = g_tMouseLayout.iTopLeftX + mouse_width;
+	g_tMouseLayout.iBottomRightY = g_tMouseLayout.iTopLeftY + mouse_height;
 
 	//设置缩放大小
 	tOriginIconPixelDatas.iBpp  = iBpp;
@@ -125,6 +149,7 @@ int InitMouse(void)
 
 	free(tIconPixelDatas.aucPixelDatas);
 	free(tOriginIconPixelDatas.aucPixelDatas);
+
 	return 0;
 }
 

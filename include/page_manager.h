@@ -67,5 +67,7 @@ void GetPageCfg(PT_PageCfg ptPagecfg);
 int InitMouse(void);
 //显示鼠标
 int ShowMouse(int x, int y);
+//重绘历史鼠标
+int ShowHistoryMouse(void);
 #endif
 
