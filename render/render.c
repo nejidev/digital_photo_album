@@ -2,8 +2,11 @@
 #include <conf.h>
 #include <file.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <pic_operation.h>
+#include <page_manager.h>
+#include <disp_manager.h>
 
 int GetFontPixel()
 {
@@ -55,10 +58,15 @@ static void InvertButton(PT_Layout ptLayout)
 {
 	int i;
 	int y;
-	unsigned char *videoMem;
-	int iButtonWidthBytes;
-	PT_DispOpr ptDispOpr = GetDefaultDispDev();
-	videoMem = ptDispOpr->pucDispMem + ptLayout->iTopLeftY * ptDispOpr->iLineWidth;
+	unsigned char  *videoMem;
+	int             iButtonWidthBytes;
+	PT_DispOpr      ptDispOpr;
+	PT_VideoMem     ptSyncVideoMem;
+	ptDispOpr       = GetDefaultDispDev();
+	ptSyncVideoMem  = GetVideoMem(ID("sync"), 1);
+	
+	//绘制到镜像显存上
+	videoMem  = ptSyncVideoMem->tPixelDatas.aucPixelDatas + ptLayout->iTopLeftY * ptDispOpr->iLineWidth;
 	videoMem += ptLayout->iTopLeftX * ptDispOpr->iBpp / 8;
 	iButtonWidthBytes = (ptLayout->iBottomRightX - ptLayout->iTopLeftX) * ptDispOpr->iBpp / 8;
 	//将图片像素取反
@@ -70,6 +78,12 @@ static void InvertButton(PT_Layout ptLayout)
 		}
 		videoMem += ptDispOpr->iLineWidth;
 	}
+	//同步镜像显存到LCD
+	memcpy(ptDispOpr->pucDispMem, ptSyncVideoMem->tPixelDatas.aucPixelDatas, ptSyncVideoMem->tPixelDatas.iTotalBytes);
+
+	//重绘鼠标
+	ShowHistoryMouse();
+	
 }
 
 void PressButton(PT_Layout ptLayout)

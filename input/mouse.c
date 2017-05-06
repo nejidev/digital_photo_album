@@ -91,15 +91,13 @@ static int MouseGetInputEvent(PT_InputEvent ptInputEvent)
 			
 		ptInputEvent->iX = postion_x;
 		ptInputEvent->iY = postion_y;
+
+		//默认松开按键
+		ptInputEvent->iPressure = 0;
 		//按下左键
 		if(0x9 == buf[0])
 		{
 			ptInputEvent->iPressure = 1;
-		}
-		//松开按键
-		if(0x8 == buf[0])
-		{
-			ptInputEvent->iPressure = 0;
 		}
 		return 0;
 	}

@@ -89,6 +89,9 @@ static void ShowMainPage(PT_PageLayout ptPageLayout)
 	
 	//刷到LCD
 	FlushVideoMemToDev(ptVideoMem);
+
+	//显示鼠标历史位置
+	ShowHistoryMouse();
 	
 	//释放显存
 	PutVideoMem(ptVideoMem);
