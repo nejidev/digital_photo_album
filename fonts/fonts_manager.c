@@ -38,7 +38,7 @@ void ShowFontOpr(void)
 	}
 }
 
-int FontsInit(void)
+int InitFonts(void)
 {
 	int iError = 0;
 	iError |= ASCIIInit();

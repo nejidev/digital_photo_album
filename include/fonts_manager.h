@@ -24,7 +24,7 @@ typedef struct FontOpr{
 
 int RegisterFontOpr(PT_FontOpr ptFontOpr);
 void ShowFontOpr(void);
-int FontsInit(void);
+int InitFonts(void);
 int ASCIIInit(void);
 int GBKInit(void);
 int FreeTypeInit(void);

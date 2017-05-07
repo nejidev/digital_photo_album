@@ -40,7 +40,7 @@ int ID(char *pcName);
 //主页 Page
 int MainPageInit(void);
 //设置参数的 Page
-int SetingPageInit(void);
+int SettingPageInit(void);
 //定时播放的 Page
 int IntevalPageInit(void);
 //浏览文件的 Page

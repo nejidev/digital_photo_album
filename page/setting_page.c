@@ -4,28 +4,28 @@
 #include <stdlib.h>
 
 //icon图标
-static T_Layout g_atMainPageIconsLayout[] = {
-	{0, 0, 0, 0, "browse_mode.bmp"},
-	{0, 0, 0, 0, "continue_mod.bmp"},
-	{0, 0, 0, 0, "setting.bmp"},
+static T_Layout g_atSettingPageIconsLayout[] = {
+	{0, 0, 0, 0, "select_fold.bmp"},
+	{0, 0, 0, 0, "interval.bmp"},
+	{0, 0, 0, 0, "return.bmp"},
 	{0, 0, 0, 0, NULL},
 };
 
-//main Page layout
-static T_PageLayout g_tMainPageLayout = {
+//Setting Page layout
+static T_PageLayout g_tSettingPageLayout = {
 	.iMaxTotalBytes = 0,
-	.atLayout       = g_atMainPageIconsLayout,
+	.atLayout       = g_atSettingPageIconsLayout,
 };
 
-static void MainPageRun(PT_PageParams ptPageParams);
+static void SettingPageRun(PT_PageParams ptPageParams);
 
-static T_PageAction g_tMainPageAction = {
-	.name = "main",
-	.Run  = MainPageRun,
+static T_PageAction g_tSettingPageAction = {
+	.name = "setting",
+	.Run  = SettingPageRun,
 };
 
 //计算 Page Layout 位置
-static void CalcMainPageLayout(PT_PageLayout ptPageLayout)
+static void CalcSettingPageLayout(PT_PageLayout ptPageLayout)
 {
 	int iXres;
 	int iYres;
@@ -48,8 +48,14 @@ static void CalcMainPageLayout(PT_PageLayout ptPageLayout)
 	ptPageLayout->iMaxTotalBytes = iIconWidth * iIconHeight * iBpp;
 
 	//计算每个的大小
+	i = 0;
 	while(atLayout[i].strIconName)
 	{
+		//第3个返回图标要显示 为正方型
+		if(2 == i)
+		{
+			iIconWidth = iIconHeight;
+		}
 		atLayout[i].iTopLeftX     = (iXres - iIconWidth )/2;
 		atLayout[i].iBottomRightX = atLayout[i].iTopLeftX + iIconWidth;
 		atLayout[i].iTopLeftY     = iIconMargin;
@@ -61,7 +67,7 @@ static void CalcMainPageLayout(PT_PageLayout ptPageLayout)
 	
 }
 
-static void ShowMainPage(PT_PageLayout ptPageLayout)
+static void ShowSettingPage(PT_PageLayout ptPageLayout)
 {
 	PT_VideoMem ptVideoMem;
 	PT_Layout atLayout = ptPageLayout->atLayout;
@@ -69,11 +75,11 @@ static void ShowMainPage(PT_PageLayout ptPageLayout)
 	//如果位置为0说明未计算位置
 	if(0 == atLayout[0].iTopLeftX && 0 == atLayout[0].iBottomRightX)
 	{
-		CalcMainPageLayout(ptPageLayout);
+		CalcSettingPageLayout(ptPageLayout);
 	}
 	
 	//获取显存
-	ptVideoMem = GetVideoMem(ID("main"), 1);
+	ptVideoMem = GetVideoMem(ID("setting"), 1);
 	if(! ptVideoMem)
 	{
 		DEBUG_PRINTF("cat't get video mem \n");
@@ -100,7 +106,7 @@ static void ShowMainPage(PT_PageLayout ptPageLayout)
 	
 }
 
-static void MainPageRun(PT_PageParams ptPageParams)
+static void SettingPageRun(PT_PageParams ptPageParams)
 {
 	int iIndex;
 	T_InputEvent tInputEvent;
@@ -108,13 +114,13 @@ static void MainPageRun(PT_PageParams ptPageParams)
 	int iIndexPressed = 0; /* 按键下标 */
 	
 	//显示 icons
-	ShowMainPage(&g_tMainPageLayout);
+	ShowSettingPage(&g_tSettingPageLayout);
 
 	//处理事件
 	/* 3. 调用GetInputEvent获得输入事件，进而处理 */
 	while (1)
 	{
-		iIndex = GenericGetInputEvent(&g_tMainPageLayout, &tInputEvent);
+		iIndex = GenericGetInputEvent(&g_tSettingPageLayout, &tInputEvent);
 
 		/**
 		 *判断按键事件算法
@@ -126,7 +132,7 @@ static void MainPageRun(PT_PageParams ptPageParams)
 			if(bPressed)
 			{
 				/* 曾经有按钮被按下 */
-				ReleaseButton(&g_atMainPageIconsLayout[iIndexPressed]);
+				ReleaseButton(&g_atSettingPageIconsLayout[iIndexPressed]);
 				bPressed = 0;
 				//如果按下和松开是同一个按键
 				if(iIndexPressed == iIndex)
@@ -137,11 +143,14 @@ static void MainPageRun(PT_PageParams ptPageParams)
 						break;
 
 						case 1 : 
+						{
+							GetPage("inteval")->Run(NULL);
+						}
 						break;
 
 						case 2 :
 						{
-							GetPage("setting")->Run(NULL);
+							GetPage("main")->Run(NULL);
 						}
 						break;
 					}
@@ -158,15 +167,15 @@ static void MainPageRun(PT_PageParams ptPageParams)
 				{
 					bPressed      = 1;
 					iIndexPressed = iIndex;
-					PressButton(&g_atMainPageIconsLayout[iIndexPressed]);
+					PressButton(&g_atSettingPageIconsLayout[iIndexPressed]);
 				}
 			}
 		}
 	}
 }
 
-int MainPageInit(void)
+int SettingPageInit(void)
 {
-	return RegisterPageAction(&g_tMainPageAction);
+	return RegisterPageAction(&g_tSettingPageAction);
 }
 

@@ -1,6 +1,7 @@
 #include <conf.h>
 #include <string.h>
 #include <disp_manager.h>
+#include <page_manager.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -104,6 +105,7 @@ int AllocVideoMem(int iNum)
 	iVMSize    = iLineBytes * iYres;
 
 	//先把 设备的 freebuffer 放入
+	/*
 	ptNew = malloc(sizeof(T_VideoMem));
 	if(NULL == ptNew)
 	{
@@ -125,10 +127,12 @@ int AllocVideoMem(int iNum)
 	{
 		ptNew->eVideoMemState = VMS_USED_FOR_CUR;
 	}
+	
 	//放入链表
 	ptNew->ptNext = g_ptVideoMemHead;
 	g_ptVideoMemHead = ptNew;
-
+	*/
+	
 	//分配其它的
 	for(i=0; i<iNum; i++)
 	{
@@ -213,6 +217,13 @@ void PutVideoMem(PT_VideoMem ptVideoMem)
 	ptVideoMem->eVideoMemState = VMS_FREE;
 }
 
+void FlushVideoMemToDevSync(PT_VideoMem ptVideoMem)
+{
+	PT_VideoMem ptSyncVideoMem  = GetVideoMem(ID("sync"), 1);
+	memcpy(ptSyncVideoMem->tPixelDatas.aucPixelDatas, ptVideoMem->tPixelDatas.aucPixelDatas, ptVideoMem->tPixelDatas.iLineBytes * ptVideoMem->tPixelDatas.iHeight);
+}
+
+
 void FlushVideoMemToDev(PT_VideoMem ptVideoMem)
 {
 	if(! ptVideoMem->bDevFrameBuffer)
@@ -221,44 +232,89 @@ void FlushVideoMemToDev(PT_VideoMem ptVideoMem)
 	}
 }
 
-void ClearVideoMem(PT_VideoMem ptVideoMem, unsigned int dwColor)
+int ConvertColorBpp(unsigned int *pDwColor, int bpp)
 {
-	unsigned char *pucVM;
-	unsigned short *pwVM16bpp;
-	unsigned int *pdwVM32bpp;
-	unsigned short wColor16bpp; /* 565 */
-	int i;
 	int r,g,b;
+	if(16 == bpp)
+	{
+		r = (*pDwColor >>(16+3)) & 0x1f;
+		g = (*pDwColor >>(8+2))  & 0x3f;
+		b = (*pDwColor >>3)  & 0x1f;
+		*pDwColor = (r<<11) | (g<<5) | (b<<0);
+	}
+	return 0;
+}
 
-	pucVM = ptVideoMem->tPixelDatas.aucPixelDatas;
-	pwVM16bpp  = (unsigned short *)pucVM;
-	pdwVM32bpp = (unsigned int *)pucVM;
+int ShowPixelPixelDatasMem(PT_PixelDatas ptPixelDatas, int iPenX, int iPenY, unsigned int dwColor)
+{
+	unsigned char  *pen8;
+	unsigned short *pen16;
+	unsigned int   *pen32;
+	
+	if(iPenX > ptPixelDatas->iWidth || iPenY > ptPixelDatas->iHeight)
+	{
+		DEBUG_PRINTF("ShowPixelPixelDatasMem overflow width:%d height:%d pnex:%d peny:%d \n", ptPixelDatas->iWidth, ptPixelDatas->iHeight, iPenX, iPenY);
+		return -1;
+	}
+	pen8   = ptPixelDatas->aucPixelDatas;
+	pen8  += (iPenY * ptPixelDatas->iLineBytes + iPenX * ptPixelDatas->iBpp / 8);
+	pen16  = (unsigned short *)pen8;
+	pen32  = (unsigned int *)pen8;
+	ConvertColorBpp(&dwColor, ptPixelDatas->iBpp);
 
-	//转为565
-	r = (dwColor >>(16+3)) & 0x1f;
-	g = (dwColor >>(8+2))  & 0x3f;
-	b = (dwColor >>3)  & 0x1f;
-	wColor16bpp = (r<<11) | (g<<5) | (b<<0);
-
-	switch(ptVideoMem->tPixelDatas.iBpp)
+	switch(ptPixelDatas->iBpp)
 	{
 		case 8:
 		{
-			memset(ptVideoMem->tPixelDatas.aucPixelDatas, dwColor, ptVideoMem->tPixelDatas.iTotalBytes);
+			*pen8 = dwColor;
 		}
 		break;
 		case 16:
 		{
-			for(i=0; i<ptVideoMem->tPixelDatas.iTotalBytes; i+=2)
+			*pen16 = (unsigned short)dwColor;
+		}
+		break;
+		case 32:
+		{
+			*pen32 = dwColor;
+		}
+		break;
+	}
+	return 0;
+}
+
+void ClearPixelDatasMem(PT_PixelDatas ptPixelDatas, unsigned int dwColor)
+{
+	unsigned char *pucVM;
+	unsigned short *pwVM16bpp;
+	unsigned int *pdwVM32bpp;
+	int i;
+
+	pucVM = ptPixelDatas->aucPixelDatas;
+	pwVM16bpp  = (unsigned short *)pucVM;
+	pdwVM32bpp = (unsigned int *)pucVM;
+
+	ConvertColorBpp(&dwColor, ptPixelDatas->iBpp);
+
+	switch(ptPixelDatas->iBpp)
+	{
+		case 8:
+		{
+			memset(ptPixelDatas->aucPixelDatas, dwColor, ptPixelDatas->iTotalBytes);
+		}
+		break;
+		case 16:
+		{
+			for(i=0; i<ptPixelDatas->iTotalBytes; i+=2)
 			{
-				*pwVM16bpp = wColor16bpp;
+				*pwVM16bpp = dwColor;
 				pwVM16bpp++;
 			}
 		}
 		break;
 		case 32:
 		{
-			for(i=0; i<ptVideoMem->tPixelDatas.iTotalBytes; i+=4)
+			for(i=0; i<ptPixelDatas->iTotalBytes; i+=4)
 			{
 				*pdwVM32bpp = dwColor;
 				pdwVM32bpp++;
@@ -266,5 +322,10 @@ void ClearVideoMem(PT_VideoMem ptVideoMem, unsigned int dwColor)
 		}
 		break;
 	}
+}
+
+void ClearVideoMem(PT_VideoMem ptVideoMem, unsigned int dwColor)
+{
+	ClearPixelDatasMem(&ptVideoMem->tPixelDatas, dwColor);
 }
 

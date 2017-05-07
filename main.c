@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <draw.h>
 #include <disp_manager.h>
 #include <page_manager.h>
+#include <fonts_manager.h>
 
 /*
 测试方法
@@ -19,6 +21,8 @@ ts_calibrate
 int main(int argc, char **argv)
 {
 	PT_DispOpr ptDispOpr;
+	T_PageParams tPageParams;
+	PT_FontOpr ptFontOpr;
 
 	//初始化LCD
 	DisplayInit();
@@ -26,6 +30,11 @@ int main(int argc, char **argv)
 	
 	ptDispOpr = GetDefaultDispDev();
 	ptDispOpr->CleanScreen(0);
+
+	//初始化freetype  
+	InitFonts();
+	ptFontOpr = GetFontOpr("freetype");
+	ptFontOpr->FontInit("STCAIYUN.TTF", 24);
 
 	//分配5个显存
 	AllocVideoMem(5);
@@ -39,9 +48,8 @@ int main(int argc, char **argv)
 	//初始化页面
 	InitPages();
 
-
 	//运行第一个页面
-	GetPage("main")->Run(NULL);
+	GetPage("main")->Run(&tPageParams);
 
 	return 0;
 }

@@ -75,7 +75,6 @@ static int FBShowPixel(int iX, int iY, unsigned int dwColor)
 	unsigned char *pucFB;
 	unsigned short *pucFB16bbp;
 	
-	int r,g,b;
 	if(iX > g_tFBVar.xres || iY > g_tFBVar.yres)
 	{
 		DEBUG_PRINTF("out of screen region \n");
@@ -88,11 +87,8 @@ static int FBShowPixel(int iX, int iY, unsigned int dwColor)
 	{
 		case 16:
 		{
-			//תΪ565
-			r = (dwColor >>(16+3)) & 0x1f;
-			g = (dwColor >>(8+2))  & 0x3f;
-			b = (dwColor >>3)  & 0x1f;
-			*pucFB16bbp = (unsigned short) (r<<11) | (g<<5) | (b<<0);
+			ConvertColorBpp(&dwColor, 16);
+			*pucFB16bbp = (unsigned short)dwColor;
 		}
 		break;
 		default:
@@ -107,8 +103,6 @@ static int FBCleanScreen(unsigned int dwBackColor)
 	unsigned char *pucFB;
 	unsigned short *pucFB16bbp;
 	
-	int r,g,b;
-	
 	pucFB = g_putcFBMem;
 	pucFB16bbp = (unsigned short *)pucFB;
 
@@ -118,11 +112,8 @@ static int FBCleanScreen(unsigned int dwBackColor)
 		{
 			while(pucFB16bbp < (unsigned short *)(g_putcFBMem + g_dwScreenSize))
 			{
-				//תΪ565
-				r = (dwBackColor >>(16+3)) & 0x1f;
-				g = (dwBackColor >>(8+2))  & 0x3f;
-				b = (dwBackColor >>3)  & 0x1f;
-				*pucFB16bbp = (r<<11) | (g<<5) | (b<<0);
+				ConvertColorBpp(&dwBackColor, 16);
+				*pucFB16bbp = dwBackColor;
 				pucFB16bbp++;
 			}
 		}

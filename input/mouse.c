@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/time.h>
-#include <linux/input.h>
+#include <unistd.h>
 
 #define MOUSE_DEV "/dev/input/mouse0"
 

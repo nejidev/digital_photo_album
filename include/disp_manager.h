@@ -63,8 +63,12 @@ int GetDispResolution(int *piXres, int *piYres, int *piBpp);
 int AllocVideoMem(int iNum);
 PT_VideoMem GetVideoMem(int iID, int bCur);
 void PutVideoMem(PT_VideoMem ptVideoMem);
+void FlushVideoMemToDevSync(PT_VideoMem ptVideoMem);
 void FlushVideoMemToDev(PT_VideoMem ptVideoMem);
+int ShowPixelPixelDatasMem(PT_PixelDatas ptPixelDatas, int iPenX, int iPenY, unsigned int dwColor);
+void ClearPixelDatasMem(PT_PixelDatas ptPixelDatas, unsigned int dwColor);
 void ClearVideoMem(PT_VideoMem ptVideoMem, unsigned int dwColor);
+int ConvertColorBpp(unsigned int *pDwColor, int bpp);
 #endif
 
 

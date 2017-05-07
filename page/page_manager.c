@@ -301,5 +301,7 @@ int InitPages(void)
 	int iError;
 	iError  = InitMouse();
 	iError |= MainPageInit();
+	iError |= SettingPageInit();
+	iError |= IntevalPageInit();
 	return iError;
 }

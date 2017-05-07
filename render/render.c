@@ -7,6 +7,7 @@
 #include <pic_operation.h>
 #include <page_manager.h>
 #include <disp_manager.h>
+#include <fonts_manager.h>
 
 int GetFontPixel()
 {
@@ -20,6 +21,88 @@ int GetPicPixel()
 
 int GetDrawPixel()
 {
+	return 0;
+}
+
+int MergePixelDatasToVideoMem(int x, int y, PT_PixelDatas ptPixelDatas, PT_VideoMem ptVideoMem)
+{
+	int i;
+	unsigned char  *srcBuf;
+	unsigned char  *dstBuf;
+	srcBuf  = ptPixelDatas->aucPixelDatas;
+	dstBuf  = ptVideoMem->tPixelDatas.aucPixelDatas;
+	dstBuf += ptVideoMem->tPixelDatas.iLineBytes * y;
+	dstBuf += x * ptVideoMem->tPixelDatas.iBpp / 8;
+	
+	for(i=y; i<(y + ptPixelDatas->iHeight); i++)
+	{
+		memcpy(dstBuf, srcBuf, ptPixelDatas->iLineBytes);
+		srcBuf += ptPixelDatas->iLineBytes;
+		dstBuf += ptVideoMem->tPixelDatas.iLineBytes;
+	}
+	return 0;
+}
+
+
+int MergeFontBitmapToPixelDatas(PT_FontBitMap ptFontBitMap, PT_PixelDatas ptPixelDatas)
+{
+	//字模
+ 	unsigned char *buf;
+	int i;
+	int x;
+	int y;
+
+	for(y = ptFontBitMap->iYTop; y<ptFontBitMap->iYMax; y++)
+	{
+		//对于freetype buffer 的开始位置不一定是 1 可能一行需要2－3个来显示
+		buf = (y - ptFontBitMap->iYTop) * ptFontBitMap->iPitch + ptFontBitMap->pucBuffer;
+		for(x = ptFontBitMap->iXLeft; x<ptFontBitMap->iXMax; x+=8)
+		{
+			for(i=0; i<8; i++)
+			{
+				if(*buf & (1<<(7-i)))
+				{
+					ShowPixelPixelDatasMem(ptPixelDatas, x+i, y, COLOR_FOREGROUND);
+				}
+				else
+				{
+					ShowPixelPixelDatasMem(ptPixelDatas, x+i, y, COLOR_BACKGROUND);
+				}	
+			}
+			buf++;
+		}
+	}
+	//计算下一个原点
+	ptFontBitMap->iCurOriginX = ptFontBitMap->iNextOriginX;
+	ptFontBitMap->iCurOriginY = ptFontBitMap->iNextOriginY;
+	return 0;
+}
+
+int GetPixelDatasForFreetype(char *str, PT_PixelDatas ptPixelDatas)
+{
+	int iError;
+	PT_FontOpr   ptFontOpr;
+	T_FontBitMap tFontBitMap;
+	char *p;
+	ptFontOpr    = GetFontOpr("freetype");
+	//ptFontOpr = GetFontOpr("ascii");
+	
+	//设置原点
+	tFontBitMap.iCurOriginX = 0;
+	tFontBitMap.iCurOriginY = ptPixelDatas->iHeight;
+	p = str;
+	while(*p)
+	{
+		iError = ptFontOpr->GetFontBitMap(*p, &tFontBitMap);
+		if(iError)
+		{
+			DEBUG_PRINTF("GetPixelDatasForFreetype error \n");
+			return -1;
+		}
+		//将fontBitMap 写入 ptPixelDatas
+		MergeFontBitmapToPixelDatas(&tFontBitMap, ptPixelDatas);
+		p++;
+	}
 	return 0;
 }
 
