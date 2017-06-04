@@ -5,9 +5,9 @@
 
 //icon图标
 static T_Layout g_atMainPageIconsLayout[] = {
-	{0, 0, 0, 0, "browse_mode.bmp"},
-	{0, 0, 0, 0, "continue_mod.bmp"},
-	{0, 0, 0, 0, "setting.bmp"},
+	{0, 0, 0, 0, ICON_DIR"browse_mode.bmp"},
+	{0, 0, 0, 0, ICON_DIR"continue_mod.bmp"},
+	{0, 0, 0, 0, ICON_DIR"setting.bmp"},
 	{0, 0, 0, 0, NULL},
 };
 
@@ -113,9 +113,8 @@ static void MainPageRun(PT_PageParams ptPageParams)
 	//处理事件
 	/* 3. 调用GetInputEvent获得输入事件，进而处理 */
 	while (1)
-	{
+	{ 
 		iIndex = GenericGetInputEvent(&g_tMainPageLayout, &tInputEvent);
-
 		/**
 		 *判断按键事件算法
 		 *
@@ -141,7 +140,7 @@ static void MainPageRun(PT_PageParams ptPageParams)
 
 						case 2 :
 						{
-							GetPage("setting")->Run(NULL);
+							GetPage("setting")->Run(ptPageParams);
 						}
 						break;
 					}

@@ -1,6 +1,7 @@
 #ifndef __FILE_H
 #define __FILE_H
 #include <stdio.h>
+#include <pic_operation.h>
 
 /* 文件类别 */
 typedef enum {
@@ -15,7 +16,6 @@ typedef struct FileMap{
 	unsigned char *pucFileMapMem;
 }T_FileMap, *PT_FileMap;
 
-
 typedef struct DirFiles{
 	char strName[256];
 	E_FileType eFileType;
@@ -23,6 +23,10 @@ typedef struct DirFiles{
 
 int MapFile(PT_FileMap ptFileMap);
 void UnMapFile(PT_FileMap ptFileMap);
+int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber);
+int GetFileICON(PT_PixelDatas ptIconPixelDatas, char *name);
+int GetFileIconName(PT_DirFiles ptDirFiles, char *pcIconName);
+int FileExist(char *file);
 
 #endif
 

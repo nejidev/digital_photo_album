@@ -3,6 +3,7 @@
 #include <disp_manager.h>
 #include <page_manager.h>
 #include <fonts_manager.h>
+#include <file.h>
 
 /*
 测试方法
@@ -21,7 +22,7 @@ ts_calibrate
 int main(int argc, char **argv)
 {
 	PT_DispOpr ptDispOpr;
-	T_PageParams tPageParams;
+	T_PageParams tPageParams = { .intvalSceond = 1 , .strSelectDir = "/" };
 	PT_FontOpr ptFontOpr;
 
 	//初始化LCD
@@ -34,8 +35,8 @@ int main(int argc, char **argv)
 	//初始化freetype  
 	InitFonts();
 	ptFontOpr = GetFontOpr("freetype");
-	ptFontOpr->FontInit("STCAIYUN.TTF", 24);
-
+	ptFontOpr->FontInit("simfang.ttf", 24);
+	
 	//分配5个显存
 	AllocVideoMem(5);
 
@@ -50,7 +51,7 @@ int main(int argc, char **argv)
 
 	//运行第一个页面
 	GetPage("main")->Run(&tPageParams);
-
+	
 	return 0;
 }
 

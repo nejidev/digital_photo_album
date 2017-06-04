@@ -6,8 +6,8 @@
 
 /* 页面参数 */
 typedef struct PageParams{
-	int iPageID; /* 页面的ID */
-	char strCurPictureFile[256]; /* 要处理的第一个图片文件 */
+	int intvalSceond;
+	char strSelectDir[256];
 }T_PageParams, *PT_PageParams;
 
 /* 页面步局 */
@@ -28,12 +28,6 @@ typedef struct PageAction{
 	int (*GetInputEvent)(PT_PageLayout ptPageLayout, PT_InputEvent ptInputEvent);
 	struct PageAction *ptNext;
 }T_PageAction, *PT_PageAction;
-
-/* 页面配置信息 */
-typedef struct PageCfg{
-	int intvalSceond;
-	char strSelectDir[256];
-}T_PageCfg, *PT_PageCfg;
 
 //生成 ID 唯一
 int ID(char *pcName);
@@ -61,8 +55,6 @@ int GenericGetInputEvent(PT_PageLayout ptPageLayout, PT_InputEvent ptInputEvent)
 PT_PageAction GetPage(char *pcName);
 //比较2个 timeval 相差的毫秒
 int TimeMSBetween(struct timeval tTimeStart, struct timeval tTimeEnd);
-//得到配置信息
-void GetPageCfg(PT_PageCfg ptPagecfg);
 //初始化鼠标
 int InitMouse(void);
 //显示鼠标

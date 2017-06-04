@@ -15,7 +15,7 @@ int InputInit(void)
 {
 	int iError = 0;
 	
-	iError |= StdInit();
+	//iError |= StdInit();
 	iError |= TouchScreenInit();
 	iError |= MouseInit();
 	return iError;

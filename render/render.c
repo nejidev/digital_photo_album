@@ -112,8 +112,7 @@ int GetPixelDatasForIcon(char *strFileName, PT_PixelDatas ptPixelDatas)
 	PT_PicFileParser ptPicFileParser;
 
 	//打开文件进行 mmap
-	snprintf(tFileMap.strFileName, 256, "%s/%s", ICON_DIR, strFileName);
-	
+	strncpy(tFileMap.strFileName, strFileName, 256);
 	tFileMap.strFileName[255] = '\0';
 	if(MapFile(&tFileMap))
 	{

@@ -5,7 +5,14 @@
 #define COLOR_BACKGROUND 0xe7dbb5 //·º»ÆµÄÖ½
 #define COLOR_FOREGROUND 0x514438 //×ÖÌåÑÕÉ«
 
-#define ICON_DIR "./icon"
+#define ICON_DIR "./icon/"
+
+#define DIR_FILE_ICON_WIDTH    40
+#define DIR_FILE_ICON_HEIGHT   DIR_FILE_ICON_WIDTH
+#define DIR_FILE_NAME_HEIGHT   20
+#define DIR_FILE_NAME_WIDTH   (DIR_FILE_ICON_HEIGHT + DIR_FILE_NAME_HEIGHT)
+#define DIR_FILE_ALL_WIDTH    DIR_FILE_NAME_WIDTH
+#define DIR_FILE_ALL_HEIGHT   DIR_FILE_ALL_WIDTH
 
 //#define DEBUG_PRINTF(...)
 #define DEBUG_PRINTF printf

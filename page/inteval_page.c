@@ -11,11 +11,11 @@ static int GenerateInterval(PT_VideoMem ptVideoMem);
 
 //icon图标
 static T_Layout g_atIntevalPageIconsLayout[] = {
-	{0, 0, 0, 0, "time_inc.bmp"},
-	{0, 0, 0, 0, "time.bmp"},
-	{0, 0, 0, 0, "time_add.bmp"},
-	{0, 0, 0, 0, "ok.bmp"},
-	{0, 0, 0, 0, "cancel.bmp"},
+	{0, 0, 0, 0, ICON_DIR"time_inc.bmp"},
+	{0, 0, 0, 0, ICON_DIR"time.bmp"},
+	{0, 0, 0, 0, ICON_DIR"time_add.bmp"},
+	{0, 0, 0, 0, ICON_DIR"ok.bmp"},
+	{0, 0, 0, 0, ICON_DIR"cancel.bmp"},
 	{0, 0, 0, 0, NULL},
 };
 
@@ -237,7 +237,7 @@ static void IntevalPageRun(PT_PageParams ptPageParams)
 		 *
 		 */
 		//松开状态 压力值 为 0
-		if (tInputEvent.iPressure == 0)
+		if (0 == tInputEvent.iPressure)
 		{
 			if(bPressed)
 			{
@@ -270,13 +270,16 @@ static void IntevalPageRun(PT_PageParams ptPageParams)
 							ReGenerateInterval();
 						}
 						break;
+						case 3 :
+						{
+							//确定时设置当前设置的时间间隔
+							ptPageParams->intvalSceond = g_iInteval;
+							GetPage("setting")->Run(ptPageParams);
+						}
 						case 4 :
 						{
-							GetPage("setting")->Run(NULL);
-						}
-						case 5 :
-						{
-							GetPage("setting")->Run(NULL);
+							//取消时设置不变
+							GetPage("setting")->Run(ptPageParams);
 						}
 						break;
 					}

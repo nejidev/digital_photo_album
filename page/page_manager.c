@@ -8,7 +8,7 @@ PT_PageAction g_ptPageActionHead;
 
 //鼠标图片
 static T_Layout g_tMouseLayout = {
-	0,0,0,0, "mouse.bmp"
+	0,0,0,0, ICON_DIR"mouse.bmp"
 };
 
 //鼠标缩放以后的像素数据
@@ -303,5 +303,6 @@ int InitPages(void)
 	iError |= MainPageInit();
 	iError |= SettingPageInit();
 	iError |= IntevalPageInit();
+	iError |= BroserPageInit();
 	return iError;
 }

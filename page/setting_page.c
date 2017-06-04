@@ -5,9 +5,9 @@
 
 //icon图标
 static T_Layout g_atSettingPageIconsLayout[] = {
-	{0, 0, 0, 0, "select_fold.bmp"},
-	{0, 0, 0, 0, "interval.bmp"},
-	{0, 0, 0, 0, "return.bmp"},
+	{0, 0, 0, 0, ICON_DIR"select_fold.bmp"},
+	{0, 0, 0, 0, ICON_DIR"interval.bmp"},
+	{0, 0, 0, 0, ICON_DIR"return.bmp"},
 	{0, 0, 0, 0, NULL},
 };
 
@@ -127,7 +127,7 @@ static void SettingPageRun(PT_PageParams ptPageParams)
 		 *
 		 */
 		//松开状态 压力值 为 0
-		if (tInputEvent.iPressure == 0)
+		if (0 == tInputEvent.iPressure)
 		{
 			if(bPressed)
 			{
@@ -140,17 +140,20 @@ static void SettingPageRun(PT_PageParams ptPageParams)
 					switch(iIndex)
 					{
 						case 0 : 
+						{
+							GetPage("browse")->Run(ptPageParams);
+						}
 						break;
 
 						case 1 : 
 						{
-							GetPage("inteval")->Run(NULL);
+							GetPage("inteval")->Run(ptPageParams);
 						}
 						break;
 
 						case 2 :
 						{
-							GetPage("main")->Run(NULL);
+							GetPage("main")->Run(ptPageParams);
 						}
 						break;
 					}
