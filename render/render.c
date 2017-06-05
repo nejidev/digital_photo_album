@@ -8,6 +8,7 @@
 #include <page_manager.h>
 #include <disp_manager.h>
 #include <fonts_manager.h>
+#include <encoding_manager.h>
 
 int GetFontPixel()
 {
@@ -78,30 +79,112 @@ int MergeFontBitmapToPixelDatas(PT_FontBitMap ptFontBitMap, PT_PixelDatas ptPixe
 	return 0;
 }
 
-int GetPixelDatasForFreetype(char *str, PT_PixelDatas ptPixelDatas)
+int GetPixelDatasForFreetype(unsigned char *str, PT_PixelDatas ptPixelDatas)
 {
 	int iError;
 	PT_FontOpr   ptFontOpr;
 	T_FontBitMap tFontBitMap;
-	char *p;
+	int iLen = 0;
+	unsigned char *pucBufStart;
+	unsigned char *pucBufEnd;
+	unsigned int dwCode;
+	int fontWitdh  = 0;
+	int fontHeight = 0;
+	int fontNum = 0; //可以显示的字符个数
+
+	int iMinX = 32000, iMaxX = -1;
+	int iMinY = 32000, iMaxY = -1;
+	pucBufStart = str;
+	pucBufEnd   = str + strlen((char *)str); 
 	ptFontOpr    = GetFontOpr("freetype");
 	//ptFontOpr = GetFontOpr("ascii");
 	
 	//设置原点
 	tFontBitMap.iCurOriginX = 0;
-	tFontBitMap.iCurOriginY = ptPixelDatas->iHeight;
-	p = str;
-	while(*p)
+	tFontBitMap.iCurOriginY = 0;
+	
+	//获取最多能显示多少个字符
+	while (1)
 	{
-		iError = ptFontOpr->GetFontBitMap(*p, &tFontBitMap);
+		iLen = GetCodeFrmBuf(pucBufStart, pucBufEnd, &dwCode);
+		/* 字符串结束 */
+		if(0 == iLen)
+		{
+			break;
+		}
+		pucBufStart += iLen;
+		/* 获得字符的位图, 位图信息里含有字符显示时的左上角、右下角坐标 */
+		iError = ptFontOpr->GetFontBitMap(dwCode, &tFontBitMap);
 		if(iError)
 		{
 			DEBUG_PRINTF("GetPixelDatasForFreetype error \n");
 			return -1;
 		}
-		//将fontBitMap 写入 ptPixelDatas
+		if (iMinX > tFontBitMap.iXLeft)
+		{
+			iMinX = tFontBitMap.iXLeft;
+		}
+		if (iMaxX < tFontBitMap.iXMax)
+		{
+			iMaxX = tFontBitMap.iXMax;
+		}
+		if (iMinY > tFontBitMap.iYTop)
+		{
+			iMinY = tFontBitMap.iYTop;
+		}
+		if (iMaxY < tFontBitMap.iXMax)
+		{
+			iMaxY = tFontBitMap.iYMax;
+		}
+			
+		tFontBitMap.iCurOriginX = tFontBitMap.iNextOriginX;
+		tFontBitMap.iCurOriginY = tFontBitMap.iNextOriginY;
+
+		//计算字符的大小
+		fontWitdh  = iMaxX - iMinX;
+		fontHeight = iMaxY - iMinY;
+		//如果字符的宽度大于 容器的宽度就退出
+		if(fontWitdh > ptPixelDatas->iWidth)
+		{
+			fontNum--;
+			break;
+		}
+		if(fontHeight > ptPixelDatas->iHeight)
+		{
+			DEBUG_PRINTF("GetPixelDatasForFreetype err Height allow \n");
+			return -1;
+		}
+		//有效字符个数++
+		fontNum++;
+	}
+
+	pucBufStart = str;
+	pucBufEnd   = str + strlen((char *)str); 
+
+	//设置原点 在中间居中显示
+	tFontBitMap.iCurOriginX = (ptPixelDatas->iWidth  - fontWitdh)  / 2;
+	tFontBitMap.iCurOriginY = (ptPixelDatas->iHeight - fontHeight) / 2 + fontHeight;
+	
+	//生成在画布上
+	while(fontNum)
+	{
+		iLen = GetCodeFrmBuf(pucBufStart, pucBufEnd, &dwCode);
+		/* 字符串结束 */
+		if(0 == iLen)
+		{
+			break;
+		}
+		pucBufStart += iLen;
+		/* 获得字符的位图, 位图信息里含有字符显示时的左上角、右下角坐标 */
+		iError = ptFontOpr->GetFontBitMap(dwCode, &tFontBitMap);
+		if(iError)
+		{
+			DEBUG_PRINTF("GetPixelDatasForFreetype error \n");
+			return -1;
+		}
+		//生成
 		MergeFontBitmapToPixelDatas(&tFontBitMap, ptPixelDatas);
-		p++;
+		fontNum--;
 	}
 	return 0;
 }

@@ -6,7 +6,7 @@
 
 int PicZoom(PT_PixelDatas ptOriginPic, PT_PixelDatas ptZoomPic);
 int PicMerge(int iX, int iY, PT_PixelDatas ptSmallPic, PT_PixelDatas ptBigPic);
-int GetPixelDatasForFreetype(char *str, PT_PixelDatas ptPixelDatas);
+int GetPixelDatasForFreetype(unsigned char *str, PT_PixelDatas ptPixelDatas);
 int GetPixelDatasForIcon(char *strFileName, PT_PixelDatas ptPixelDatas);
 void PressButton(PT_Layout ptLayout);
 void ReleaseButton(PT_Layout ptLayout);

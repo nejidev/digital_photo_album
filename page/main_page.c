@@ -133,6 +133,9 @@ static void MainPageRun(PT_PageParams ptPageParams)
 					switch(iIndex)
 					{
 						case 0 : 
+						{
+							GetPage("browse")->Run(ptPageParams);
+						}
 						break;
 
 						case 1 : 

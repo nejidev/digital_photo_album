@@ -93,22 +93,41 @@ static int GenerateIcon(PT_VideoMem ptVideoMem, PT_Layout ptLayout, char *pcFile
 	int iYres;
 	int iBpp;
 	T_PixelDatas tPixelDatas;
+	T_PixelDatas tFontPixelDatas;
 	
 	//测量LCD的信息
 	GetDispResolution(&iXres, &iYres, &iBpp);
 	
-	tPixelDatas.iHeight = DIR_FILE_ALL_HEIGHT;
-	tPixelDatas.iWidth  = DIR_FILE_ALL_WIDTH;
+	tPixelDatas.iHeight = DIR_FILE_ICON_HEIGHT;
+	tPixelDatas.iWidth  = DIR_FILE_ICON_WIDTH;
 	tPixelDatas.iBpp    = iBpp;
-	tPixelDatas.iLineBytes = tPixelDatas.iWidth * tPixelDatas.iBpp / 8;
+	tPixelDatas.iLineBytes  = tPixelDatas.iWidth * tPixelDatas.iBpp / 8;
 	tPixelDatas.iTotalBytes = tPixelDatas.iLineBytes * tPixelDatas.iHeight;
-
+	
 	tPixelDatas.aucPixelDatas = malloc(tPixelDatas.iTotalBytes);
 	if(! tPixelDatas.aucPixelDatas)
 	{
 		DEBUG_PRINTF("malloc error \n");
 		return -1;
 	}
+	//清为背景色
+	ClearPixelDatasMem(&tPixelDatas, COLOR_BACKGROUND);
+
+	tFontPixelDatas.iHeight = DIR_FILE_NAME_HEIGHT;
+	tFontPixelDatas.iWidth  = DIR_FILE_NAME_WIDTH;
+	tFontPixelDatas.iBpp    = iBpp;
+	tFontPixelDatas.iLineBytes  = tFontPixelDatas.iWidth * tFontPixelDatas.iBpp / 8;
+	tFontPixelDatas.iTotalBytes = tFontPixelDatas.iLineBytes * tFontPixelDatas.iHeight;
+	
+
+	tFontPixelDatas.aucPixelDatas = malloc(tFontPixelDatas.iTotalBytes);
+	if(! tFontPixelDatas.aucPixelDatas)
+	{
+		DEBUG_PRINTF("malloc error \n");
+		return -1;
+	}
+	//清为背景色
+	ClearPixelDatasMem(&tFontPixelDatas, COLOR_BACKGROUND);
 	
 	//获取icon 显存
 	if(GetFileICON(&tPixelDatas, ptLayout->strIconName))
@@ -122,13 +141,23 @@ static int GenerateIcon(PT_VideoMem ptVideoMem, PT_Layout ptLayout, char *pcFile
 		DEBUG_PRINTF("MergePixelDatasToVideoMem error \n");
 		return -1;
 	}
-	
-	//绘制文件名
+	//绘制文件名 使用 freetype 或 汉字库 或 ascii 生成数据
+	if(GetPixelDatasForFreetype((unsigned char *)pcFileName, &tFontPixelDatas))
+	{
+		DEBUG_PRINTF("GetPixelDatasForFreetype error \n");
+		return -1;
+	}
 
 	//合并到主显存
+	if(MergePixelDatasToVideoMem(ptLayout->iTopLeftX, ptLayout->iTopLeftY + DIR_FILE_ICON_HEIGHT , &tFontPixelDatas, ptVideoMem))
+	{
+		DEBUG_PRINTF("MergePixelDatasToVideoMem error \n");
+		return -1;
+	}
 
 	//释放内存
 	free(tPixelDatas.aucPixelDatas);
+	free(tFontPixelDatas.aucPixelDatas);
 	return 0;
 }
 
@@ -166,7 +195,7 @@ static int GenerateBrowseDirIcon(PT_VideoMem ptVideoMem)
 	g_tBrowseFilesLayout.atLayout = atDirLayout;
 	
 	//生成 ICON 显示
-	dirIconX   = margin;
+	dirIconX   = margin*2;
 	dirIconY   = iYres * 2 / 10 + margin;
 	while(i < iNum)
 	{
@@ -192,6 +221,14 @@ static int GenerateBrowseDirIcon(PT_VideoMem ptVideoMem)
 		{
 			DEBUG_PRINTF("GenerateIcon Err \n");
 			return -1;
+		}
+		//重新设定位置
+		dirIconX += DIR_FILE_ALL_WIDTH + margin;
+		//这里要计算 右X 是否超出
+		if((dirIconX + DIR_FILE_ALL_WIDTH) >= iXres)
+		{
+			dirIconX = margin*2;
+			dirIconY += DIR_FILE_ALL_HEIGHT + margin * 2;
 		}
 		
 		i++;

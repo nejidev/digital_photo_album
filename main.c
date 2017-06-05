@@ -35,7 +35,10 @@ int main(int argc, char **argv)
 	//初始化freetype  
 	InitFonts();
 	ptFontOpr = GetFontOpr("freetype");
-	ptFontOpr->FontInit("simfang.ttf", 24);
+	ptFontOpr->FontInit("msyh.ttf", 12);
+
+	//初始化字符解码
+	EncodingInit();
 	
 	//分配5个显存
 	AllocVideoMem(5);

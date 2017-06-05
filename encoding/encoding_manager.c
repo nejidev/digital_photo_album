@@ -5,6 +5,21 @@
 
 static PT_EncodingOpr g_ptEncodingOprHead;
 
+int GetCodeFrmBuf(unsigned char *pucBufStart, unsigned char *pucBufEnd, unsigned int *pdwCode)
+{
+	PT_EncodingOpr temp = g_ptEncodingOprHead;
+	while(temp)
+	{
+		if(0 == strcmp("utf8", temp->name))
+		{
+			return temp->GetCodeFrmBuf(pucBufStart, pucBufEnd, pdwCode);
+		}
+		temp = temp->ptNext;
+	}
+	DEBUG_PRINTF("GetCodeFrmBuf error \n");
+	return -1;
+}
+
 int RegisterEncodingOpr(PT_EncodingOpr ptEncodingOpr)
 {
 	PT_EncodingOpr ptTempEncodingOpr;

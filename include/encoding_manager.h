@@ -21,6 +21,7 @@ int AsciiEncodingInit(void);
 int Utf16beEncodingInit(void);
 int Utf16beEncodingInit(void);
 int Utf8EncodingInit(void);
+int GetCodeFrmBuf(unsigned char *pucBufStart, unsigned char *pucBufEnd, unsigned int *pdwCode);
 
 #endif
 
