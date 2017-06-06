@@ -68,7 +68,7 @@ int MergeFontBitmapToPixelDatas(PT_FontBitMap ptFontBitMap, PT_PixelDatas ptPixe
 				else
 				{
 					ShowPixelPixelDatasMem(ptPixelDatas, x+i, y, COLOR_BACKGROUND);
-				}	
+				}
 			}
 			buf++;
 		}
@@ -146,7 +146,7 @@ int GetPixelDatasForFreetype(unsigned char *str, PT_PixelDatas ptPixelDatas)
 		//如果字符的宽度大于 容器的宽度就退出
 		if(fontWitdh > ptPixelDatas->iWidth)
 		{
-			fontNum--;
+			fontNum -= 1;
 			break;
 		}
 		if(fontHeight > ptPixelDatas->iHeight)
@@ -162,8 +162,11 @@ int GetPixelDatasForFreetype(unsigned char *str, PT_PixelDatas ptPixelDatas)
 	pucBufEnd   = str + strlen((char *)str); 
 
 	//设置原点 在中间居中显示
-	tFontBitMap.iCurOriginX = (ptPixelDatas->iWidth  - fontWitdh)  / 2;
+	tFontBitMap.iCurOriginX =0;// (ptPixelDatas->iWidth  - fontWitdh)  / 2; 自动居中显示 也有点问题 后期在修正
 	tFontBitMap.iCurOriginY = (ptPixelDatas->iHeight - fontHeight) / 2 + fontHeight;
+
+	//自动计算显示个数还有点问题，先手工指定
+	fontNum = 8;
 	
 	//生成在画布上
 	while(fontNum)

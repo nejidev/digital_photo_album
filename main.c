@@ -3,6 +3,7 @@
 #include <disp_manager.h>
 #include <page_manager.h>
 #include <fonts_manager.h>
+#include <encoding_manager.h>
 #include <file.h>
 
 /*

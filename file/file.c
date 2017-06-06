@@ -91,8 +91,9 @@ int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber)
 	struct dirent **aptNameList;
 	int iNum;
 	int i;
+	int iRealNum = 0;
 	iNum = scandir(strDirName, &aptNameList, 0, alphasort);
-	if(-1 == iNum)
+	if(0 > iNum)
 	{
 		DEBUG_PRINTF("scandir err %s \n", strDirName);
 	 	return -1;
@@ -105,6 +106,7 @@ int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber)
 		return -1;
 	}
 	//双指针的 指针等于新分配的
+	free(*pptDirFiles);
 	*pptDirFiles = ptDirFiles;
 	
 	//填充 ptDirFiles
@@ -121,7 +123,7 @@ int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber)
 			strncpy(ptDirFiles[i]->strName, aptNameList[i]->d_name, 256);
 			ptDirFiles[i]->strName[255] = '\n';
 			ptDirFiles[i]->eFileType = FILETYPE_DIR;
-			(*piNumber)++;
+			iRealNum++;
 		}
 		if(isFile(strDirName, aptNameList[i]->d_name))
 		{
@@ -134,7 +136,7 @@ int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber)
 			strncpy(ptDirFiles[i]->strName, aptNameList[i]->d_name, 256);
 			ptDirFiles[i]->strName[255] = '\n';
 			ptDirFiles[i]->eFileType = FILETYPE_FILE;
-			(*piNumber)++;
+			iRealNum++;
 		}
 	}
 	
@@ -148,6 +150,7 @@ int GetDirContents(char *strDirName, PT_DirFiles **pptDirFiles, int *piNumber)
 	}
 	//释放内存
 	free(aptNameList);
+	*piNumber = iRealNum;
 	return 0;
 }
 
