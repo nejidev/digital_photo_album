@@ -207,7 +207,7 @@ int GetPixelDatasForIcon(char *strFileName, PT_PixelDatas ptPixelDatas)
 	}
 	
 	//查找合适的解析器
-	ptPicFileParser = MatchParser(tFileMap.pucFileMapMem);
+	ptPicFileParser = MatchParser(tFileMap.pucFileMapMem, tFileMap.iFileSize);
 	//ptPicFileParser = Parser("bmp");
 	
 	//解析图片放到 ptPixelDatas

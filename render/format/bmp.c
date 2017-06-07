@@ -30,7 +30,7 @@ typedef struct tagBITMAPINFOHEADER { /* bmih */
 
 //#pragma pack(pop) /* 恢复先前的pack设置 */
 
-static int isBMPFormat(unsigned char *aFileHead);
+static int isBMPFormat(unsigned char *aFileHead, int iMemlen);
 static int GetPixelDatasFrmBMP(unsigned char *aFileHead, PT_PixelDatas ptPixelDatas);
 static int FreePixelDatasForBMP(PT_PixelDatas ptPixelDatas);
 
@@ -42,7 +42,7 @@ static T_PicFileParser g_tBMPParser = {
 };
 
 //支持返回1 否则返回0
-static int isBMPFormat(unsigned char *aFileHead)
+static int isBMPFormat(unsigned char *aFileHead, int iMemlen)
 {
 	if(0x42 != aFileHead[0] && 0x4d != aFileHead[1])
 	{

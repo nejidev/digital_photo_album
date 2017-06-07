@@ -93,7 +93,7 @@ static int RunNesGame(char *nes)
 }
 
 //查看 BMP 图片
-static int RunBMP(char *file)
+static int RunBMPJPG(char *file)
 {
 	char filePath[256];
 	int iXres;
@@ -317,12 +317,12 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 					return -1;
 				}
 			}
-			//查看 bmp 图片
-			if(0 == strcmp("bmp.bmp", IconName))
+			//查看 bmp jpg 图片
+			if(0 == strcmp("bmp.bmp", IconName) || 0 == strcmp("jpg.bmp", IconName))
 			{
-				if(RunBMP(ptDirFiles->strName))
+				if(RunBMPJPG(ptDirFiles->strName))
 				{
-					DEBUG_PRINTF("RunBMP error \n");	
+					DEBUG_PRINTF("RunBMPJPG error \n");	
 					return -1;
 				}
 			}

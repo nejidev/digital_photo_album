@@ -30,12 +30,12 @@ int RegisterParse(PT_PicFileParser ptPicFileParser)
 	return 0;
 }
 
-PT_PicFileParser MatchParser(unsigned char *pcPicHead)
+PT_PicFileParser MatchParser(unsigned char *pcPicHead, int iMemlen)
 {
 	PT_PicFileParser ptTmp = g_ptPicFileParserHead;
 	while(ptTmp)
 	{
-		if(ptTmp->isSupport(pcPicHead))
+		if(ptTmp->isSupport(pcPicHead, iMemlen))
 		{
 			return ptTmp;
 		}
@@ -61,8 +61,9 @@ PT_PicFileParser Parser(char *pcName)
 
 int InitParse(void)
 {
-	int iError;
-	iError = BmpInitParse();
+	int iError = 0;
+	iError |= BmpInitParse();
+	iError |= JPEGInitParse();
 	return iError;
 }
 
