@@ -21,6 +21,8 @@
  */
 //图标的间距
 #define ICON_MARGIN 10
+//当前是否有显示进程占用主区域
+static int g_iUseMainArea = 0;
 //当前有多少个子项目
 static int g_iDirFilesNum;
 //当前页显示多少个子项目
@@ -87,6 +89,65 @@ static int RunNesGame(char *nes)
 		disp->DeviceInit();
 		return -1;
 	}
+	return 0;
+}
+
+//查看 BMP 图片
+static int RunBMP(char *file)
+{
+	char filePath[256];
+	int iXres;
+	int iYres;
+	int iBpp;
+	PT_VideoMem ptVideoMem;
+	//读取Icon图片缩放到合适大小
+	T_PixelDatas tOriginIconPixelDatas;
+ 	T_PixelDatas tIconPixelDatas;
+	
+	ptVideoMem = GetVideoMem(ID("sync"), 1);
+	
+	//测量LCD的信息
+	GetDispResolution(&iXres, &iYres, &iBpp);
+	snprintf(filePath, 256, "%s/%s", g_acDirPath, file);
+	
+	//设置缩放大小
+	tOriginIconPixelDatas.iBpp  = iBpp;
+	tIconPixelDatas.iBpp        = iBpp;
+	tIconPixelDatas.iHeight     = iYres * 8 / 10;
+	tIconPixelDatas.iWidth      = iXres;
+	tIconPixelDatas.iLineBytes  = tIconPixelDatas.iWidth * tIconPixelDatas.iBpp / 8;
+	tIconPixelDatas.iTotalBytes = tIconPixelDatas.iLineBytes * tIconPixelDatas.iHeight;
+	
+
+	//分配缩放后 icon 图片的显存
+	tIconPixelDatas.aucPixelDatas = (unsigned char *)malloc(tIconPixelDatas.iTotalBytes);
+	if(NULL == tIconPixelDatas.aucPixelDatas)
+	{
+		DEBUG_PRINTF("malloc tIconPixelDatas error \n");
+		return -1;
+	}
+	//得到 BMP 图片数据
+	if(GetPixelDatasForIcon(filePath, &tOriginIconPixelDatas))
+	{
+		free(tIconPixelDatas.aucPixelDatas);
+		DEBUG_PRINTF("GetPixelDatasForIcon error \n");
+		return -1;
+	}
+	//执行缩放
+	PicZoom(&tOriginIconPixelDatas, &tIconPixelDatas);
+			
+	//写入显存
+	PicMerge(0, iYres * 2 / 10, &tIconPixelDatas, &ptVideoMem->tPixelDatas);
+			
+	//释放 BMP 图片数据内存
+	free(tOriginIconPixelDatas.aucPixelDatas);
+	free(tIconPixelDatas.aucPixelDatas);
+	
+	FlushVideoMemToDevSync(ptVideoMem);
+	ShowHistoryMouse();
+
+	//占用主区域 为事件处理做准备 在次点击图片返回
+	g_iUseMainArea++;
 	return 0;
 }
 
@@ -253,6 +314,15 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 				if(RunNesGame(ptDirFiles->strName))
 				{
 					DEBUG_PRINTF("RunNesGame error \n");	
+					return -1;
+				}
+			}
+			//查看 bmp 图片
+			if(0 == strcmp("bmp.bmp", IconName))
+			{
+				if(RunBMP(ptDirFiles->strName))
+				{
+					DEBUG_PRINTF("RunBMP error \n");	
 					return -1;
 				}
 			}
@@ -613,6 +683,13 @@ static void BrowsePageRun(PT_PageParams ptPageParams)
 		//在生成的文件图标中查找
 		if(-1 == iIndex)
 		{
+			//如果有其它绘图占了主区域 在次点击它时就返回
+			if(g_iUseMainArea)
+			{
+				//重绘当前路径
+				BrowseDir();
+				g_iUseMainArea = 0;
+			}
 			iIndex = GenericGetInputEvent(&g_tBrowseFilesLayout, &tInputEvent);
 			if(RunIconEvent(iIndex, &tInputEvent))
 			{
