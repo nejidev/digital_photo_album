@@ -7,6 +7,7 @@
 #include <string.h>
 #include <file.h>
 #include <libgen.h>
+#include <unistd.h>
 
 #define min(a,b) (a<b ? a : b)
 
@@ -65,6 +66,29 @@ static T_PageAction g_tBrowsePageAction = {
 static int GenerateIcon(PT_VideoMem ptVideoMem, PT_Layout ptLayout, char *pcFileName);
 static int GenerateBrowseDirIcon(PT_VideoMem ptVideoMem);
 static int BrowseDir(void);
+
+//运行 nes 模拟器 
+/**
+ * 使用说明:必须先在文件系统中编译 InfoNES 项目 并把 InfoNES 可执行文件
+ * 添加到 /usr/bin 可执行PATH 中，而且内核要支持 ALSA 音频，否则没声音
+ * 手柄支持USB 和 真实手柄2种，并且也需要内核支持和键位对应
+ */
+static int RunNesGame(char *nes)
+{
+	char NesPath[256];
+	PT_DispOpr disp;
+	disp = GetDefaultDispDev();
+	//因为 InfoNes 也需要绘制在 lcd 上所以要先关闭 数码相册
+	disp->DeviceExit();
+	snprintf(NesPath, 256, "%s %s/%s", "InfoNES", g_acDirPath, nes);
+	if(-1 == system(NesPath))
+	{
+		DEBUG_PRINTF("exec InfoNES %s err\n", NesPath);
+		disp->DeviceInit();
+		return -1;
+	}
+	return 0;
+}
 
 //清除重绘区域
 static int CleanBrowseMainArea(PT_VideoMem ptVideoMem)
@@ -202,7 +226,6 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 			ptLayout = &g_tBrowseFilesLayout.atLayout[iEventID];
 			IconName = basename(ptLayout->strIconName);	
 			//找到对应的文件
-			printf("g_iDirFilesIndex: %d %d %d\n", g_iDirFilesIndex, g_iShowFilesNum, iEventID);
 			ptDirFiles = g_ptDirFiles[g_iDirFilesIndex - g_iShowFilesNum + iEventID];
 			
 			//切换目录
@@ -211,7 +234,7 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 				//更换文件打开的图标
 				ptLayout->strIconName = ICON_DIR"dir_open.bmp";
 				if(GenerateIcon(ptVideoMem, ptLayout, ptDirFiles->strName))
-				{				
+				{
 					DEBUG_PRINTF("GenerateIcon error \n");	
 					return -1;
 				}
@@ -223,6 +246,15 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 				realpath(JumpDirPath, g_acDirPath);
 				//显示
 				BrowseDir();
+			}
+			//运行nes 游戏
+			if(0 == strcmp("nes.bmp", IconName))
+			{
+				if(RunNesGame(ptDirFiles->strName))
+				{
+					DEBUG_PRINTF("RunNesGame error \n");	
+					return -1;
+				}
 			}
 		}
 	}

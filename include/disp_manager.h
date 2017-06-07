@@ -43,6 +43,7 @@ typedef struct DispOpr{
 	int iLineWidth;
 	unsigned char *pucDispMem;
 	int (*DeviceInit)(void);
+	int (*DeviceExit)(void);
 	int (*ShowPixel)(int iPenX, int iPenY, unsigned int dwColor);
 	int (*CleanScreen)(unsigned int dwBackColor);
 	//œ‘ æ“ª“≥

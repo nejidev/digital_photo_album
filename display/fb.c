@@ -9,6 +9,7 @@
 #include <string.h>
 
 static int FBDeviceInit(void);
+static int FBDeviceExit(void);
 static int FBShowPixel(int iX, int iY, unsigned int dwColor);
 static int FBCleanScreen(unsigned int dwBackColor);
 
@@ -25,6 +26,7 @@ static unsigned int g_dwPixelWidth;
 static T_DispOpr g_tFBDispOpr = {
 	.name = "fb",
 	.DeviceInit  = FBDeviceInit,
+	.DeviceExit  = FBDeviceExit,
 	.ShowPixel   = FBShowPixel,
 	.CleanScreen = FBCleanScreen,
 };
@@ -67,6 +69,13 @@ static int FBDeviceInit(void)
 		return -1;
 	}
 	g_tFBDispOpr.pucDispMem = g_putcFBMem;
+	return 0;
+}
+
+static int FBDeviceExit(void)
+{
+	munmap(g_tFBDispOpr.pucDispMem, g_dwScreenSize);
+	close(g_fb_fd);
 	return 0;
 }
 
