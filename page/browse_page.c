@@ -201,8 +201,9 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 		{
 			ptLayout = &g_tBrowseFilesLayout.atLayout[iEventID];
 			IconName = basename(ptLayout->strIconName);	
-			//找到对应的文件	
-			ptDirFiles = g_ptDirFiles[iEventID];
+			//找到对应的文件
+			printf("g_iDirFilesIndex: %d %d %d\n", g_iDirFilesIndex, g_iShowFilesNum, iEventID);
+			ptDirFiles = g_ptDirFiles[g_iDirFilesIndex - g_iShowFilesNum + iEventID];
 			
 			//切换目录
 			if(0 == strcmp("dir.bmp", IconName))
@@ -343,6 +344,7 @@ static int GenerateBrowseDirIcon(PT_VideoMem ptVideoMem)
 		i++;
 	}
 	g_iDirFilesIndex += iNum;
+	g_iShowFilesNum   = iNum;
 	return iErr;
 }
 
