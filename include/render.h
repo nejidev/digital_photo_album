@@ -1,6 +1,7 @@
 #ifndef __RENDER_H
 #define __RENDER_H
 #include <pic_operation.h>
+#include <gif_operation.h>
 #include <disp_manager.h>
 #include <fonts_manager.h>
 

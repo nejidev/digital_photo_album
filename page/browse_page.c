@@ -92,6 +92,28 @@ static int RunNesGame(char *nes)
 	return 0;
 }
 
+static int RunGIFPlay(char *file)
+{
+	int gifPlayDelayMs = 0;
+	char filePath[256];
+	
+	snprintf(filePath, 256, "%s/%s", g_acDirPath, file);
+	//1,检查是不是GIF文件
+	printf("%s \n", filePath);
+	if(GIFisSupport(filePath))
+	{
+		DEBUG_PRINTF("GIFisSupport err \n");
+		return -1;
+	}
+	
+	//2,启动播放进程
+	GIFPlayStart();
+	
+	//占用主区域 为事件处理做准备 在次点击图片返回
+	g_iUseMainArea++;
+	return 0;
+}
+
 //查看 BMP 图片
 static int RunBMPJPG(char *file)
 {
@@ -323,6 +345,15 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 				if(RunBMPJPG(ptDirFiles->strName))
 				{
 					DEBUG_PRINTF("RunBMPJPG error \n");	
+					return -1;
+				}
+			}
+			//运行gif 播放
+			if(0 == strcmp("gif.bmp", IconName))
+			{
+				if(RunGIFPlay(ptDirFiles->strName))
+				{
+					DEBUG_PRINTF("RunGIFPlay error \n");	
 					return -1;
 				}
 			}
