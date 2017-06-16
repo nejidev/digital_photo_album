@@ -41,14 +41,14 @@ static int ConvertOneLine(int iWidth, int iBMPBpp, int iDstBpp, unsigned char *p
 	}
 	if(24 == iDstBpp)
 	{
-		//ÕâÀïÍüÁË ÑÕÉ«Ë³Ğò×ª»» ÔİÎŞ 24BPP LCD ºóÆÚÔÚ²âÊÔ
+		//è¿™é‡Œå¿˜äº† é¢œè‰²é¡ºåºè½¬æ¢ æš‚æ—  24BPP LCD åæœŸåœ¨æµ‹è¯•
 		memcpy(pucDest, pucSrc, iWidth*iBMPBpp/8);
 	}
 	else
 	{
 		for(i=0; i<iWidth; i++)
 		{
-			//GIF ÖĞÑÕÉ«ÅÅĞòÊÇ RRGGBB
+			//GIF ä¸­é¢œè‰²æ’åºæ˜¯ RRGGBB
 			dwRed   = pucSrc[pos++];
 			dwGreen = pucSrc[pos++];
 			dwBlue  = pucSrc[pos++];
@@ -100,16 +100,16 @@ static void DrawGif(ColorMapObject *ColorMap, GifRowType *ScreenBuffer, int Scre
             *p = ColorMapEntry->Blue;
 			p++;
         }
-		//×ª»»Ò»ĞĞ
+		//è½¬æ¢ä¸€è¡Œ
 		ConvertOneLine(ScreenWidth, gifBPP, tOriginIconPixelDatas.iBpp, buffer, pucDest);
 		pucDest += tOriginIconPixelDatas.iLineBytes;
     }
 	free(buffer);
 	
-	//Ö´ĞĞËõ·Å
+	//æ‰§è¡Œç¼©æ”¾
 	PicZoom(&tOriginIconPixelDatas, &tIconPixelDatas);
 				
-	//Ğ´ÈëÏÔ´æ
+	//å†™å…¥æ˜¾å­˜
 	PicMerge(0, iYres * 2 / 10, &tIconPixelDatas, &ptVideoMem->tPixelDatas);	
 	FlushVideoMemToDevSync(ptVideoMem);
 	ShowHistoryMouse();
@@ -121,7 +121,7 @@ static void *EventTreadFunction(void *pVoid)
 	ColorMapObject *ColorMap;
 	int	InterlacedOffset[] = { 0, 4, 2, 1 }, /* The way Interlaced image should. */	
 		InterlacedJumps[]  = { 8, 8, 4, 2 };    /* be read - offsets and jumps... */
-	//µÃµ½Ë½ÓĞÊı¾İµÃµ½FILE ¾ä±ú
+	//å¾—åˆ°ç§æœ‰æ•°æ®å¾—åˆ°FILE å¥æŸ„
 	fpos_t  pos;
 	GifFilePrivateType *Private = (GifFilePrivateType *)GifFile->Private;
 	FILE *pFD = Private->File;
@@ -138,7 +138,7 @@ static void *EventTreadFunction(void *pVoid)
 				//pthread_exit(NULL);
 				//return ;
 			}
-			//ÊµÏÖµ÷ÓÃ fread ¶ÁÈ¡ÎÄ¼ş
+			//å®ç°è°ƒç”¨ fread è¯»å–æ–‡ä»¶
 			if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) 
 			{
 				printf("giferr %d \n", GifFile->Error);
@@ -213,10 +213,10 @@ static void *EventTreadFunction(void *pVoid)
 			break;
 		}
 		} while (RecordType != TERMINATE_RECORD_TYPE);
-		//GIF²¥·Å¼ä¸ô us
+		//GIFæ’­æ”¾é—´éš” us
 		//usleep(gifPlayDelayMs);
 		printf("read play gif \n");
-		//ÖØĞÂÉèÖÃÖ¸ÕëÎ»ÖÃÑ­»·²¥·Å
+		//é‡æ–°è®¾ç½®æŒ‡é’ˆä½ç½®å¾ªç¯æ’­æ”¾
 		fsetpos(pFD, &pos);
 	}
 }
@@ -241,10 +241,10 @@ int GIFPlayStart(void)
 		
 	ptVideoMem = GetVideoMem(ID("sync"), 1);
 	
-	//²âÁ¿LCDµÄĞÅÏ¢
+	//æµ‹é‡LCDçš„ä¿¡æ¯
 	GetDispResolution(&iXres, &iYres, &iBpp);
 	
-	//ÉèÖÃËõ·Å´óĞ¡
+	//è®¾ç½®ç¼©æ”¾å¤§å°
 	tOriginIconPixelDatas.iBpp  = iBpp;
 	tIconPixelDatas.iBpp        = iBpp;
 	tIconPixelDatas.iHeight     = iYres * 8 / 10;
@@ -253,14 +253,14 @@ int GIFPlayStart(void)
 	tIconPixelDatas.iTotalBytes = tIconPixelDatas.iLineBytes * tIconPixelDatas.iHeight;
 	
 
-	//·ÖÅäËõ·Åºó icon Í¼Æ¬µÄÏÔ´æ
+	//åˆ†é…ç¼©æ”¾å icon å›¾ç‰‡çš„æ˜¾å­˜
 	tIconPixelDatas.aucPixelDatas = (unsigned char *)malloc(tIconPixelDatas.iTotalBytes);
 	if(NULL == tIconPixelDatas.aucPixelDatas)
 	{
 		DEBUG_PRINTF("malloc tIconPixelDatas error \n");
 		return -1;
 	}
-	//ptPixelDatasÉèÖÃ²ÎÊı
+	//ptPixelDatasè®¾ç½®å‚æ•°
 	tOriginIconPixelDatas.iWidth  = GifWidth;
 	tOriginIconPixelDatas.iHeight = GifHeight;
 	tOriginIconPixelDatas.aucPixelDatas = malloc(GifWidth * GifHeight * tOriginIconPixelDatas.iBpp / 8);
@@ -275,7 +275,7 @@ int GIFPlayStart(void)
      * Allocate the screen as vector of column of rows. Note this
      * screen is device independent - it's the screen defined by the
      * GIF file parameters.
-	 * ·ÖÅäGIF»­²¼²¢ÉèÖÃ±³¾°ÑÕÉ« ¿í¸ß±³¾°ÑÕÉ«À´×ÔGIF 
+	 * åˆ†é…GIFç”»å¸ƒå¹¶è®¾ç½®èƒŒæ™¯é¢œè‰² å®½é«˜èƒŒæ™¯é¢œè‰²æ¥è‡ªGIF 
      */
     if ((ScreenBuffer = (GifRowType *)malloc(GifFile->SHeight * sizeof(GifRowType))) == NULL)
     {
@@ -299,8 +299,8 @@ int GIFPlayStart(void)
     }
 	
 	isPlay++;
-	//2,Æô¶¯²¥·Å½ø³Ì
-	//³õÊ¼»¯³É¹¦´´½¨×ÓÏß³Ì ½«×ÓÏîµÄGetInputEvent ´«½øÀ´
+	//2,å¯åŠ¨æ’­æ”¾è¿›ç¨‹
+	//åˆå§‹åŒ–æˆåŠŸåˆ›å»ºå­çº¿ç¨‹ å°†å­é¡¹çš„GetInputEvent ä¼ è¿›æ¥
 	pthread_create(&tTreadID, NULL, EventTreadFunction, NULL);
 
 	return 0;
@@ -317,7 +317,7 @@ int GIFPlayStop(void)
 	}
 	
 	printf("gif play stop \n");
-	//ÊÍ·Å BMP Í¼Æ¬Êı¾İÄÚ´æ
+	//é‡Šæ”¾ BMP å›¾ç‰‡æ•°æ®å†…å­˜
 	free(tOriginIconPixelDatas.aucPixelDatas);
 	free(tIconPixelDatas.aucPixelDatas);
 	free(ScreenBuffer);   
