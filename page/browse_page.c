@@ -23,6 +23,8 @@
 #define ICON_MARGIN 10
 //当前是否有显示进程占用主区域
 static int g_iUseMainArea = 0;
+//是否正在播放 GIF
+static int g_iGIFPlay      = 0;
 //当前有多少个子项目
 static int g_iDirFilesNum;
 //当前页显示多少个子项目
@@ -94,12 +96,10 @@ static int RunNesGame(char *nes)
 
 static int RunGIFPlay(char *file)
 {
-	int gifPlayDelayMs = 0;
 	char filePath[256];
 	
 	snprintf(filePath, 256, "%s/%s", g_acDirPath, file);
 	//1,检查是不是GIF文件
-	printf("%s \n", filePath);
 	if(GIFisSupport(filePath))
 	{
 		DEBUG_PRINTF("GIFisSupport err \n");
@@ -108,9 +108,9 @@ static int RunGIFPlay(char *file)
 	
 	//2,启动播放进程
 	GIFPlayStart();
-	
 	//占用主区域 为事件处理做准备 在次点击图片返回
 	g_iUseMainArea++;
+	g_iGIFPlay++;
 	return 0;
 }
 
@@ -717,6 +717,11 @@ static void BrowsePageRun(PT_PageParams ptPageParams)
 			//如果有其它绘图占了主区域 在次点击它时就返回
 			if(g_iUseMainArea)
 			{
+				if(g_iGIFPlay)
+				{
+					g_iGIFPlay = 0;
+					GIFPlayStop();
+				}
 				//重绘当前路径
 				BrowseDir();
 				g_iUseMainArea = 0;

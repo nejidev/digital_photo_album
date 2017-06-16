@@ -71,7 +71,7 @@ static int ConvertOneLine(int iWidth, int iBMPBpp, int iDstBpp, unsigned char *p
 	{
 		for(i=0; i<iWidth; i++)
 		{
-			//JPG 中颜色排序是 BBGGRR
+			//JPG 中颜色排序是 RRGGBB
 			dwRed   = pucSrc[pos++];
 			dwGreen = pucSrc[pos++];
 			dwBlue  = pucSrc[pos++];

@@ -134,7 +134,9 @@ static void *EventTreadFunction(void *pVoid)
 		{
 			if(! isPlay)
 			{
-				return ;
+				//printf("play is stop \n");
+				//pthread_exit(NULL);
+				//return ;
 			}
 			//实现调用 fread 读取文件
 			if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) 
@@ -308,9 +310,13 @@ int GIFPlayStop(void)
 {
 	int err;
 	isPlay = 0;
-	//pthread_join 会发生死锁 直到线程安全退出
-	pthread_join(tTreadID, NULL);
+	if(pthread_cancel(tTreadID))
+	{
+		DEBUG_PRINTF("pthread_cancel err \n");    
+		return -1;
+	}
 	
+	printf("gif play stop \n");
 	//释放 BMP 图片数据内存
 	free(tOriginIconPixelDatas.aucPixelDatas);
 	free(tIconPixelDatas.aucPixelDatas);
