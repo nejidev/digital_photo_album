@@ -36,6 +36,8 @@ obj-y += debug/
 obj-y += render/
 obj-y += page/
 obj-y += file/
+obj-y += video/
+obj-y += convert/
 all : 
 	make -C ./ -f $(TOPDIR)/Makefile.build
 	$(CC) $(LDFLAGS) -o $(TARGET) built-in.o

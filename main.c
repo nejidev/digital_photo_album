@@ -4,6 +4,8 @@
 #include <page_manager.h>
 #include <fonts_manager.h>
 #include <encoding_manager.h>
+#include <convert_manager.h>
+#include <video_manager.h>
 #include <file.h>
 
 /*
@@ -49,6 +51,12 @@ int main(int argc, char **argv)
 
 	//初始化 图片解析
 	InitParse();
+
+	//初始化摄像头
+	InitVideoOpr();
+	
+	//初始化视频转换器
+	InitVideoConvert();
 	
 	//初始化页面
 	InitPages();

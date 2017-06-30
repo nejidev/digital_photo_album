@@ -8,6 +8,7 @@
 #include <file.h>
 #include <libgen.h>
 #include <unistd.h>
+#include <video_operation.h>
 
 #define min(a,b) (a<b ? a : b)
 
@@ -25,6 +26,8 @@
 static int g_iUseMainArea = 0;
 //是否正在播放 GIF
 static int g_iGIFPlay      = 0;
+//是否正在播放 Video
+static int g_iVideoPlay    = 0;
 //当前有多少个子项目
 static int g_iDirFilesNum;
 //当前页显示多少个子项目
@@ -481,6 +484,17 @@ static int GenerateBrowseDirIcon(PT_VideoMem ptVideoMem)
 	return iErr;
 }
 
+
+
+//显示摄像头视频在 LCD 上
+static void ShowVideo(void)
+{
+	VideoPlayStart();
+	//占用主区域 为事件处理做准备 在次点击图片返回
+	g_iUseMainArea++;
+	g_iVideoPlay++;
+}
+
 static void ShowBrowsePage(PT_PageLayout ptPageLayout)
 {
 	PT_VideoMem ptVideoMem;
@@ -722,6 +736,12 @@ static void BrowsePageRun(PT_PageParams ptPageParams)
 					g_iGIFPlay = 0;
 					GIFPlayStop();
 				}
+				if(g_iVideoPlay)
+				{
+					g_iVideoPlay = 0;
+					VideoPlayStop();
+				}
+				
 				//重绘当前路径
 				BrowseDir();
 				g_iUseMainArea = 0;
@@ -775,9 +795,21 @@ static void BrowsePageRun(PT_PageParams ptPageParams)
 							//下一页
 							ShowBrowseNextPage();
 						}
+						
+						//监控摄像头显示
 						case 4 :
 						{
-						
+							ShowVideo();
+						}
+						break;
+
+						//拍照
+						case 5 :
+						{
+							VideoSaveJpg(g_acDirPath);
+							g_iVideoPlay = 0;
+							BrowseDir();
+							g_iUseMainArea = 0;
 						}
 						break;
 					}

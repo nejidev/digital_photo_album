@@ -1,4 +1,3 @@
-ssues
 
 你也可以访问我的博客 http://www.cnblogs.com/ningci
 
@@ -11,6 +10,8 @@ ssues
 2017-06-07 17:43 实现 BMP JPG 图片查看 （需要编译 jpegsrc.v9b.tar.gz 使用 jpeg_mem_src）
 
 2017-06-16 17:52 实现 GIF 播放 （需要编译 libgif 库）
+
+2017-06-30 10:51 实现 usb camrea 实时显示图片 和 拍照 （基于 v4l2 MJPEG）
 
 使用说明
 本程序需要 icon 中的图标文件 和 msyh.ttf 和 make 以后生成的可执行文件 digitpic

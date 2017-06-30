@@ -134,7 +134,7 @@ static void *EventTreadFunction(void *pVoid)
 		{
 			if(! isPlay)
 			{
-				return ;
+				return NULL;
 			}
 			//实现调用 fread 读取文件
 			if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) 
@@ -213,7 +213,7 @@ static void *EventTreadFunction(void *pVoid)
 		} while (RecordType != TERMINATE_RECORD_TYPE);
 		//GIF播放间隔 us
 		//usleep(gifPlayDelayMs);
-		printf("read play gif \n");
+		//printf("read play gif \n");
 		//重新设置指针位置循环播放
 		fsetpos(pFD, &pos);
 	}
