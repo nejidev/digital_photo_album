@@ -36,7 +36,6 @@ static char JpgSavePath[256];
 static void VideoLCDShow(PT_PixelDatas ptPixelDatas)
 {
 	PT_DispOpr disp = GetDefaultDispDev();
-	printf("VideoLCDShow \n");
 	memcpy(disp->pucDispMem + (iYres * 2 / 10 * disp->iLineWidth), ptPixelDatas->aucPixelDatas, ptPixelDatas->iTotalBytes);
 }
 
@@ -194,6 +193,7 @@ static int VideoDevInit(void)
 		return -1;
 	}
 	initd++;
+	return 0;
 }
 
 int VideoPlayStart(void)
@@ -228,6 +228,7 @@ int VideoSaveJpg(char *dir)
 	snprintf(JpgSavePath, 256,  "%s/%s.jpg", dir, datetime);
 
 	DEBUG_PRINTF("VideoSaveJpg save to %s \n", JpgSavePath);
+	memset(&ptCameraConvert, 0, sizeof(ptCameraConvert));
 	memset(&tCameraBuf, 0, sizeof(tCameraBuf));
 	tCameraBuf.tPixelDatas.iBpp = 24;
 	tCameraBuf.iPixelFormat     = V4L2_PIX_FMT_RGB32;

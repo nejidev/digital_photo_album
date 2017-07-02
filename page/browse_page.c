@@ -9,8 +9,7 @@
 #include <libgen.h>
 #include <unistd.h>
 #include <video_operation.h>
-
-#define min(a,b) (a<b ? a : b)
+#include <avi_operation.h>
 
 /* 图标是一个正方体, "图标+名字"也是一个正方体
  *   --------
@@ -28,6 +27,8 @@ static int g_iUseMainArea = 0;
 static int g_iGIFPlay      = 0;
 //是否正在播放 Video
 static int g_iVideoPlay    = 0;
+//是否正在播放 AVI
+static int g_iAVIPlay       = 0;
 //当前有多少个子项目
 static int g_iDirFilesNum;
 //当前页显示多少个子项目
@@ -114,6 +115,19 @@ static int RunGIFPlay(char *file)
 	//占用主区域 为事件处理做准备 在次点击图片返回
 	g_iUseMainArea++;
 	g_iGIFPlay++;
+	return 0;
+}
+
+static int RunAVIPlay(char *file)
+{
+	char filePath[256];
+	
+	snprintf(filePath, 256, "%s/%s", g_acDirPath, file);
+	//1,启动播放进程
+	AVIPlayStart(filePath);
+	//占用主区域 为事件处理做准备 在次点击图片返回
+	g_iUseMainArea++;
+	g_iAVIPlay++;
 	return 0;
 }
 
@@ -357,6 +371,15 @@ static int RunIconEvent(int iEventID, PT_InputEvent ptInputEvent)
 				if(RunGIFPlay(ptDirFiles->strName))
 				{
 					DEBUG_PRINTF("RunGIFPlay error \n");	
+					return -1;
+				}
+			}
+			//运行avi 播放
+			if(0 == strcmp("avi.bmp", IconName))
+			{
+				if(RunAVIPlay(ptDirFiles->strName))
+				{
+					DEBUG_PRINTF("RunAVIPlay error \n");	
 					return -1;
 				}
 			}
@@ -740,6 +763,11 @@ static void BrowsePageRun(PT_PageParams ptPageParams)
 				{
 					g_iVideoPlay = 0;
 					VideoPlayStop();
+				}
+				if(g_iVideoPlay)
+				{
+					g_iVideoPlay = 0;
+					AVIPlayStop();
 				}
 				
 				//重绘当前路径

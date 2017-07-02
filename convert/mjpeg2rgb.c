@@ -33,6 +33,30 @@ static int Mjpeg2rgbIsSupport(int iPixelFormatIn, int iPixelFormatOut)
 static struct jpeg_decompress_struct cinfo;
 static struct jpeg_error_mgr jerr;
 
+typedef struct MyErrorMgr
+{
+	struct jpeg_error_mgr pub;
+	jmp_buf setjmp_buffer;
+}T_MyErrorMgr, *PT_MyErrorMgr;
+
+static void MyErrorExit(j_common_ptr ptCInfo)
+{
+    static char errStr[JMSG_LENGTH_MAX];
+    
+	PT_MyErrorMgr ptMyErr = (PT_MyErrorMgr)ptCInfo->err;
+
+    /* Create the message */
+    (*ptCInfo->err->format_message) (ptCInfo, errStr);
+    DEBUG_PRINTF("%s\n", errStr);
+
+	//longjmp(ptMyErr->setjmp_buffer, 1);
+}
+
+static void my_emit_message(j_common_ptr cinfo, int msg_level)  
+{
+	
+}  
+
 static int ConvertOneLine(int iWidth, int iBMPBpp, int iDstBpp, unsigned char *pucSrc, unsigned char *pucDest)
 {
 	unsigned int dwRed;
@@ -87,8 +111,19 @@ static int DecodeMJPEG(PT_PixelDatas ptMjpegPixelDatas, PT_PixelDatas ptPixelDat
 	int iBMPBpp = 0;
 	int iWidth  = 0;
 	int iHeight = 0;
+	T_MyErrorMgr tJerr;
 	
-	cinfo.err = jpeg_std_error(&jerr);	
+	//cinfo.err = jpeg_std_error(&jerr);	
+	cinfo.err               = jpeg_std_error(&tJerr.pub);
+	tJerr.pub.error_exit     = MyErrorExit;
+
+	if(setjmp(tJerr.setjmp_buffer))
+	{
+		/* 如果程序能运行到这里, 表示JPEG解码出错 */
+        jpeg_destroy_decompress(&cinfo);
+		return -1;
+	}
+	
 	jpeg_create_decompress(&cinfo);
 	jpeg_mem_src(&cinfo, ptMjpegPixelDatas->aucPixelDatas, ptMjpegPixelDatas->iTotalBytes);
 	

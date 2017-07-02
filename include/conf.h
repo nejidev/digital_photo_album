@@ -18,5 +18,7 @@
 //#define DEBUG_PRINTF(...)
 #define DEBUG_PRINTF printf
 
+#define min(a,b) (a<b ? a : b)
+
 #endif
 
